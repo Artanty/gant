@@ -1,14 +1,28 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { ApiService } from './gant/services/api.service';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, HttpClientModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  providers: [
+    HttpClient,
+    ApiService
+  ]
 })
 export class AppComponent {
+
   title = 'gant';
+  constructor (
+    private apiService: ApiService
+  ) {}
+
+  public addEvent() {
+    this.apiService.addEvent().subscribe(res => console.log(res))
+  }
 }

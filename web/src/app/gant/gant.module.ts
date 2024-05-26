@@ -8,6 +8,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { ResizableDirective } from './directives/resisable.directive';
 import { FreeDraggingHandleDirective } from './directives/free-dragging-handle.directive';
 import { FreeDraggingDirective } from './directives/draggable.directive';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ApiService } from './services/api.service';
 
 
 export const remoteRoutes: Routes = [
@@ -27,7 +29,12 @@ export const remoteRoutes: Routes = [
   ],
   imports: [
     CommonModule,
-    RouterModule.forChild(remoteRoutes)
+    RouterModule.forChild(remoteRoutes),
+    HttpClientModule
+  ],
+  providers: [
+    HttpClient,
+    ApiService
   ]
 })
 export class GantModule { }
