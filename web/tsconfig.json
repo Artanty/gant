@@ -22,7 +22,9 @@
       "dom"
     ],
     "paths": {
-      "dragula": ["../node_modules/dragula/dist/dragula.min.js"]
+      "dragula": [
+        "../node_modules/dragula/dist/dragula.min.js"
+      ]
     }
   },
   "angularCompilerOptions": {
@@ -30,5 +32,5 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  },
+  }
 }

@@ -92,7 +92,6 @@ export class FreeDraggingDirective implements AfterViewInit, OnDestroy {
 
         this.element.style.transform =
           "translate3d(" + currentX + "px, " + currentY + "px, 0)";
-
       });
     });
 
