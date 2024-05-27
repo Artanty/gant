@@ -10,6 +10,8 @@ import { FreeDraggingHandleDirective } from './directives/free-dragging-handle.d
 import { FreeDraggingDirective } from './directives/draggable.directive';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ApiService } from './services/api.service';
+import { StoreService } from './services/store.service';
+import { GantService } from './services/gant.service';
 
 
 export const remoteRoutes: Routes = [
@@ -34,7 +36,9 @@ export const remoteRoutes: Routes = [
   ],
   providers: [
     HttpClient,
-    ApiService
+    ApiService,
+    StoreService,
+    GantService
   ]
 })
 export class GantModule { }

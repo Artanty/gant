@@ -16,3 +16,7 @@
     <!-- <div #bar2 class="bar2" appDraggable (dragMove)="onDragMove($event, bar2)" appResizable [resizableGrabWidth]="8" [resizableMinWidth]="10"></div>
     <div #bar3 class="bar3" appDraggable (dragMove)="onDragMove($event, bar3)" appResizable [resizableGrabWidth]="8" [resizableMinWidth]="10"></div>
     <div #bar4 class="bar4" appDraggable (dragMove)="onDragMove($event, bar4)" appResizable [resizableGrabWidth]="8" [resizableMinWidth]="10"></div> -->
+
+    <div *ngIf="(gantEvents$ | async) as events">
+      {{events | json }}
+    </div>

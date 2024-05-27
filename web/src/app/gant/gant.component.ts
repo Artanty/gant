@@ -1,4 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
+import { IGantEvent, StoreService } from './services/store.service';
+import { Observable } from 'rxjs';
+import { GantService } from './services/gant.service';
 
 @Component({
   selector: 'app-gant',
@@ -7,6 +10,14 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 })
 export class GantComponent {
   @ViewChild('bar1', { static: true }) bar1!: ElementRef;
+  gantEvents$: Observable<IGantEvent[]>
+
+  constructor (
+    private gantService: GantService,
+    private storeService: StoreService
+  ) {
+    this.gantEvents$ = this.storeService.listenGantEvent()
+  }
   onResizeEnd(event: any ): void {
     console.log('Element was resized', event);
   }
