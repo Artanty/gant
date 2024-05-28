@@ -2,37 +2,30 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GantComponent } from './gant.component';
 import { RouterModule, Routes } from '@angular/router';
-
-
-
-import { ResizableDirective } from './directives/resisable.directive';
-import { FreeDraggingHandleDirective } from './directives/free-dragging-handle.directive';
-import { FreeDraggingDirective } from './directives/draggable.directive';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ApiService } from './services/api.service';
 import { StoreService } from './services/store.service';
 import { GantService } from './services/gant.service';
-
+import { GanttComponent } from './components/gantt/gantt.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 export const remoteRoutes: Routes = [
   {
     path: '',
     component: GantComponent,
-    // resolve: { userExternals: UserExternalsResolver }
   }
 ]
 
 @NgModule({
   declarations: [
     GantComponent,
-    FreeDraggingDirective,
-    FreeDraggingHandleDirective,
-    ResizableDirective
+    GanttComponent
   ],
   imports: [
     CommonModule,
     RouterModule.forChild(remoteRoutes),
-    HttpClientModule
+    HttpClientModule,
+    ReactiveFormsModule,
   ],
   providers: [
     HttpClient,

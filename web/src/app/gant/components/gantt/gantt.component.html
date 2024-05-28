@@ -1,0 +1,14 @@
+<form [formGroup]="form">
+<div class="controls">
+  <div class="control custom-select">
+    <select formControlName="viewMode">
+      <option *ngFor="let option of (viewModes$ | async)" [value]="option.id" [disabled]="option.id === -1">
+        {{ option.name }}
+      </option>
+    </select>
+  </div>
+</div>
+</form>
+<svg #gantt id="gantt" class="gantt" style="min-height: 100%"></svg>
+
+

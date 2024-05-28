@@ -29,9 +29,10 @@
 							"src/assets"
 						],
 						"styles": [
-							"src/styles.scss"
+							"src/styles.scss",
+              "node_modules/frappe-gantt-angular15/dist/frappe-gantt.css"
 						],
-						"scripts": [],
+            "scripts": [],
 						"main": "src/main.ts",
 						"extraWebpackConfig": "webpack.config.js",
 						"commonChunk": false

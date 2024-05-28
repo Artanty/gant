@@ -23,12 +23,12 @@ export class AppComponent {
 
   title = 'gant';
   constructor (
-    private apiService: ApiService,
+    // private apiService: ApiService,
     private gantService: GantService
   ) {}
 
   public addEvent() {
     // this.apiService.addEvent().subscribe(res => console.log(res))
-    this.gantService.addGantEvent()
+    // this.gantService.addGantEvent()
   }
 }

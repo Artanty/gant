@@ -2,10 +2,13 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface IGantEvent {
-  eventName: string
-  dateFrom: string
-  dateTo: string
   id: number
+  textId: string
+  name: string
+  start: string
+  end: string
+  progress: number
+  dependencies: string
 }
 
 @Injectable()
