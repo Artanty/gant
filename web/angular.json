@@ -29,8 +29,8 @@
 							"src/assets"
 						],
 						"styles": [
-							"src/styles.scss",
-              "node_modules/frappe-gantt-angular15/dist/frappe-gantt.css"
+              "node_modules/frappe-gantt-angular15/dist/frappe-gantt.css",
+              "src/styles.scss"
 						],
             "scripts": [],
 						"main": "src/main.ts",

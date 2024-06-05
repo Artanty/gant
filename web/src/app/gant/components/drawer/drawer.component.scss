@@ -1,0 +1,23 @@
+.drawer {
+  position: absolute;
+  opacity: 0;
+  background: rgb(0 0 0 / 64%);
+  transition:
+  top 0.3s ease-out,
+  opacity 0.3s ease-out,
+  right 0.3s ease-out;
+  &.top{
+    top: -100%;
+  }
+  &.right{
+    right: -100%;
+  }
+  width:100%;
+}
+
+.drawer.isVisible {
+  top: 0;
+  right: 0;
+  opacity: 1;
+}
+

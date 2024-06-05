@@ -5,10 +5,10 @@
     "types": [
       "node"
     ],
+    "baseUrl": "src",
     "paths": {
-      "dragula": [
-        "../node_modules/dragula/dist/dragula.min.js"
-      ]
+      "@app/*": ["app/*"],
+      "@main/*": ["app/gant/*"]
     }
   },
   "files": [

@@ -1,9 +1,11 @@
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import Gantt from 'frappe-gantt-angular15';
+import Gantt, { EnrichedTask } from 'frappe-gantt-angular15';
 import { Observable, filter, map, of, tap } from 'rxjs';
 import { IGantEvent, StoreService } from '../../services/store.service';
 import { GantService } from '../../services/gant.service';
+import { eventToUpdate } from '@app/gant/services/api.service';
+import { isoDateWithoutTimeZone } from '@app/gant/services/helpers';
 
 
 @Component({
@@ -23,6 +25,7 @@ export class GanttComponent implements OnInit {
     { id: 'Month', name: 'Месяцы' },
     { id: 'Year', name: 'Годы' },
   ])
+  testVar = 'testCar'
   public form: FormGroup;
   gantt!: Gantt
   tasks!: Gantt.Task[]
@@ -39,7 +42,42 @@ export class GanttComponent implements OnInit {
     view_mode: 'Year',
     date_format: 'YYYY-MM-DD',
     language: 'ru', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    // custom_popup_html: null
+    custom_popup_html: function(task: Gantt.EnrichedTask) {
+      return `
+        <div class="details-container">
+          <h5>${task.name}</h5>
+          <p>Task started on: ${isoDateWithoutTimeZone(task._start)}</p>
+          <p>Expected to finish by ${isoDateWithoutTimeZone(task._start)}</p>
+          <p>${task.progress}% completed!</p>
+        </div>
+      `;
+    },
+    on_date_change: (task: Gantt.EnrichedTask, start: Date, end: Date) => {
+      this.updateEventDate(task, start, end)
+    },
+    on_progress_change: (task: EnrichedTask, progress: number) => {
+      this.updateEventProgress(task, progress)
+    }
+  }
+
+  updateEventDate (task: Gantt.EnrichedTask, start: Date, end: Date) {
+    const data: eventToUpdate = {
+      textId: task.id,
+      start: isoDateWithoutTimeZone(start),
+      end: isoDateWithoutTimeZone(end),
+      progress: task.progress
+    }
+    this.gantService.updateEvent(data).subscribe()
+  }
+
+  updateEventProgress (task: EnrichedTask, progress: number) {
+    const data: eventToUpdate = {
+      textId: task.id,
+      start: task.start,
+      end: task.end,
+      progress: progress
+    }
+    this.gantService.updateEvent(data).subscribe()
   }
 
   constructor(
@@ -57,8 +95,9 @@ export class GanttComponent implements OnInit {
     }))
 
     this.gantService.getEvents().subscribe((res: any) => {
-      this.form.patchValue({ viewMode: 'Month' })
+      this.form.patchValue({ viewMode: this.form.controls['viewMode'].value })
     })
+    // this.gantt.
    }
 
   ngOnInit(): void {
@@ -80,5 +119,6 @@ export class GanttComponent implements OnInit {
         this.cdr.detectChanges()
       })
     ).subscribe()
+    // this.gantt.
   }
 }

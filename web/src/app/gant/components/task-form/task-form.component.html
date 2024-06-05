@@ -1,0 +1,78 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="header">
+    <div class="chipsContainer">
+
+      <button class="backBtn" type="button" (click)="back()"><</button>
+<!-- EXTERNAL SERVICE -->
+      <!-- <div class="chips custom-select" *ngIf="!form.value.external_task_id"
+        [class.invalid]="form.controls['externalServiceId'].invalid && (form.controls['externalServiceId'].dirty || form.controls['externalServiceId'].touched)"
+      >
+        <select formControlName="externalServiceId">
+          <option *ngFor="let option of (externals$ | async)" [value]="option.id" [disabled]="option.id === -1">
+            {{ option.name }}
+          </option>
+        </select>
+      </div> -->
+
+      <!-- <div class="chips custom-input projectId" *ngIf="form.value.external_task_id">
+        <input type="text" readonly formControlName="externalServiceName">
+      </div> -->
+
+      <!-- <div class="chips custom-input commitId" [ngStyle]="{'opacity': form.value.external_task_id ? 1 : 0}">
+        <input type="text" readonly formControlName="external_task_id">
+      </div> -->
+<!-- STATUS -->
+      <!-- <div class="chips custom-select" *ngIf="!readonly"
+        [class.invalid]="form.controls['status'].invalid && (form.controls['status'].dirty || form.controls['status'].touched)"
+      >
+        <select formControlName="status">
+          <option *ngFor="let option of taskStatusOptions" [value]="option.id" [disabled]="option.id === -1">
+            {{ option.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="chips custom-input projectId" *ngIf="readonly">
+        <input type="text" readonly formControlName="statusName">
+      </div> -->
+
+    </div>
+  </div>
+  <div class="body">
+<!-- NAME -->
+    <input type="text" formControlName="name" class="taskName" placeholder="Введите заголовок" [readonly]="readonly"
+      [class.invalid]="form.controls['name'].invalid && (form.controls['name'].dirty || form.controls['name'].touched)"
+    >
+
+<!-- DESCRIPTION -->
+    <textarea class="description"
+              formControlName="description"
+              [placeholder]="readonly ? 'Нет описания' : 'Введите описание...'"
+              [readonly]="readonly"
+    ></textarea>
+
+    <app-date-picker
+      [date]="start"
+      [reset]="resetDatePicker"
+      (selectedDate)="onSelectDateStart($event)"
+    ></app-date-picker>
+
+    <app-date-picker
+      [date]="end"
+      [reset]="resetDatePicker"
+      (selectedDate)="onSelectDateEnd($event)"
+    ></app-date-picker>
+  </div>
+
+  <input type="hidden" formControlName="externalServiceId">
+  <input type="hidden" formControlName="id">
+  <input type="hidden" formControlName="textId">
+
+  <div class="footer">
+    <button type="button" (click)="onReset()">Сброс</button>
+    <div>
+      <button type="button" (click)="onCancel()">Отмена</button>
+      <button type="submit" >Сохранить</button>
+    </div>
+  </div>
+</form>

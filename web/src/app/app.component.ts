@@ -24,7 +24,7 @@ export class AppComponent {
   title = 'gant';
   constructor (
     // private apiService: ApiService,
-    private gantService: GantService
+    // private gantService: GantService
   ) {}
 
   public addEvent() {

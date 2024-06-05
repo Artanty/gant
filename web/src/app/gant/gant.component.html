@@ -1,3 +1,20 @@
-<div class="wrapper">
-  <app-gantt></app-gantt>
+<div class="mainWrapper" #wrapper>
+  <app-gantt>
+    <button class="showCreateBtn" type="button"
+    (click)="showCreateEvent()">+ event</button>
+  </app-gantt>
+
+  <app-drawer [id]="'loader'">
+    <app-loader [show]="true"></app-loader>
+  </app-drawer>
+
+  <app-drawer [id]="'createEvent'">
+    <app-task-form></app-task-form>
+  </app-drawer>
 </div>
+
+
+
+
+
+

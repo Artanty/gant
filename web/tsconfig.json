@@ -21,10 +21,10 @@
       "ES2022",
       "dom"
     ],
+    "baseUrl": "src",
     "paths": {
-      "dragula": [
-        "../node_modules/dragula/dist/dragula.min.js"
-      ]
+      "@app/*": ["app/*"],
+      "@main/*": ["app/gant/*"]
     }
   },
   "angularCompilerOptions": {
