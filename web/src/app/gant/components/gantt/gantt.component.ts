@@ -1,10 +1,10 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import Gantt, { EnrichedTask } from 'frappe-gantt-angular15';
-import { Observable, filter, map, of, tap } from 'rxjs';
+import { EMPTY, Observable, catchError, filter, map, of, pipe, tap } from 'rxjs';
 import { IGantEvent, StoreService } from '../../services/store.service';
 import { GantService } from '../../services/gant.service';
-import { eventToUpdate } from '@app/gant/services/api.service';
+import { eventToUpdate, ApiService } from '@app/gant/services/api.service';
 import { isoDateWithoutTimeZone, lsGet, lsSet } from '@app/gant/services/helpers';
 import { DrawerService } from '../drawer/drawer.service';
 
@@ -51,7 +51,7 @@ export class GanttComponent implements OnInit, AfterViewInit {
             <h5>${task.name}</h5>
           </div>
           <p>${isoDateWithoutTimeZone(task._start)}</p>
-          <p>-> ${isoDateWithoutTimeZone(task._start)}</p>
+          <p>-> ${isoDateWithoutTimeZone(task._end)}</p>
           <p>${task.progress}% completed!</p>
         </div>
       `;
@@ -73,6 +73,8 @@ export class GanttComponent implements OnInit, AfterViewInit {
     private gantService: GantService,
     private storeService: StoreService,
     private cdr: ChangeDetectorRef,
+    private drawerService: DrawerService,
+    private apiService: ApiService
   ) {
     this.form = this.fb.group({
       viewMode: ['Month'],
@@ -105,7 +107,7 @@ export class GanttComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges()
         console.log(this.gantt)
         this.buildLeftPanel(this.gantt)
-        this.toggleLeftSideWidth()
+        this.toggleLeftSideWidth(true)
       })
     ).subscribe()
   }
@@ -116,10 +118,9 @@ export class GanttComponent implements OnInit, AfterViewInit {
   public gantTasks: any[] = []
   public gridHeaderHeight: number = 0
   public gridItemHeight: number = 0
-  private leftSideWidthInitial: number = 0
-  public leftSideWidth: number = this.leftSideWidthInitial
+  public leftSideWidth: number = 0
   public isLeftSideExpanded: boolean = false
-
+  private taskTextIdToDelete: string = ''
 
   buildLeftPanel (gantt: any) {
     this.gantTasks = gantt.tasks
@@ -127,24 +128,21 @@ export class GanttComponent implements OnInit, AfterViewInit {
     this.calculateGridHeaderHeight()
   }
 
-  toggleLeftSideWidth () {
-    if (this.leftSideWidth === this.leftSideWidthInitial) {
+  toggleLeftSideWidth (init?: boolean) {
+    if (init !== undefined) {
       this.isLeftSideExpanded = !!lsGet('isLeftSideExpanded')
     } else {
       this.isLeftSideExpanded = !this.isLeftSideExpanded
       lsSet('isLeftSideExpanded', this.isLeftSideExpanded)
     }
-    this.leftSideWidth = this.isLeftSideExpanded ? 100 : 27
+    this.leftSideWidth = this.isLeftSideExpanded ? 200 : 27
     this.cdr.detectChanges()
-  }
-
-  setLeftSideWidth () {
-    // this.leftSideWidth
   }
 
   calculateGridItemHeight (): void {
     this.gridItemHeight = (this.options.bar_height ?? 0) + (this.options.padding ?? 0)
   }
+
   calculateGridHeaderHeight (): void {
     const svgElement = this.ganttElement?.nativeElement;
     if (svgElement) {
@@ -181,8 +179,21 @@ export class GanttComponent implements OnInit, AfterViewInit {
     this.gantService.updateEvent(data).subscribe()
   }
 
-  deleteEvent() {
-    // console.log(task)
+  closePreDeleteEventDrawer () {
+    this.drawerService.hide('preDeleteEvent')
+  }
+
+  confirmDeleteEvent () {
+    if (!this.taskTextIdToDelete) throw new Error('no task marked to delete')
+    this.gantService.deleteEvent(this.taskTextIdToDelete)
+    .subscribe(() => {
+      this.closePreDeleteEventDrawer()
+    })
+  }
+
+  deleteEvent(textId: string) {
+    this.taskTextIdToDelete = textId
+    this.drawerService.show('preDeleteEvent')
   }
 
   handleEventClick(element?: EnrichedTask | any) {

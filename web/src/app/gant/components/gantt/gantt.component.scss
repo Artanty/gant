@@ -79,3 +79,42 @@
   margin: 3px;
 }
 
+.preDeleteDrawerInner{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+.preDeleteDrawerBlock{
+  width: 280px;
+  background: #141414;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
+  justify-content: space-around;
+  color: #ddd;
+  & .btn{
+    background: #474747;
+    border-color: transparent;
+    color: #d1d1d1;
+    cursor: pointer;
+    font-weight: 600;
+    border: 2px solid;
+    border-radius: 17px;
+    padding: 7px 18px;
+    background: transparent;
+    &--back{
+      &:hover{
+        background-color: #a4940d;
+      }
+    }
+    &--confirm{
+      &:hover{
+        background-color: #a41f0d;
+      }
+    }
+  }
+}

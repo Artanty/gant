@@ -11,7 +11,6 @@
     </div>
     </form>
     <ng-content></ng-content>
-    <button class="backBtn" type="button" (click)="deleteEvent()"><</button>
 </div>
 
 <div class="panelsContainer">
@@ -26,10 +25,23 @@
     </div>
     <ul class="leftPanel__list">
       <li class="leftPanel__list__item" *ngFor="let item of gantTasks; let i = index">
-        <button class="deleteBtn" (click)="toggleLeftSideWidth()">x</button>
+        <button class="deleteBtn" (click)="deleteEvent(item.id)">x</button>
         <span *ngIf="isLeftSideExpanded">{{item.name}}</span>
       </li>
     </ul>
   </div>
   <svg #gantt id="gantt" class="gantt" style="min-height: 100%"></svg>
 </div>
+
+<app-drawer [id]="'preDeleteEvent'">
+  <div class="preDeleteDrawerInner">
+    <div class="preDeleteDrawerBlock">
+      Are use sure?
+    <button class="btn btn--back" type="button"
+      (click)="closePreDeleteEventDrawer()"><</button>
+    <button class="btn btn--confirm" type="button"
+      (click)="confirmDeleteEvent()">ya</button>
+    </div>
+
+  </div>
+</app-drawer>

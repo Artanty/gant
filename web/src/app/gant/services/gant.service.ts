@@ -56,6 +56,18 @@ export class GantService {
     )
   }
 
+  deleteEvent (data: string) {
+    this.drawerService.showAfterInit('loader')
+    return this.apiService.deleteEvent(data)
+    .pipe(
+      switchMap(() => this.getEvents()),
+      catchError((err: any) => this.handleError(err)),
+      finalize(() => {
+        this.drawerService.hide('loader')
+      })
+    )
+  }
+
   /**
    * Convert event to display in gantt table
    */
