@@ -11,7 +11,25 @@
     </div>
     </form>
     <ng-content></ng-content>
+    <button class="backBtn" type="button" (click)="deleteEvent()"><</button>
 </div>
-<svg #gantt id="gantt" class="gantt" style="min-height: 100%"></svg>
 
-
+<div class="panelsContainer">
+  <div class="leftPanel"
+    [ngStyle]="{ 'minWidth': leftSideWidth + 'px' }"
+  >
+    <div class="leftPanel__header"
+      [ngStyle]="{ 'height': gridHeaderHeight + 'px' }">
+      <button class="toggleBtn" (click)="toggleLeftSideWidth()">
+        {{ isLeftSideExpanded ? '<' : '>'}}
+      </button>
+    </div>
+    <ul class="leftPanel__list">
+      <li class="leftPanel__list__item" *ngFor="let item of gantTasks; let i = index">
+        <button class="deleteBtn" (click)="toggleLeftSideWidth()">x</button>
+        <span *ngIf="isLeftSideExpanded">{{item.name}}</span>
+      </li>
+    </ul>
+  </div>
+  <svg #gantt id="gantt" class="gantt" style="min-height: 100%"></svg>
+</div>

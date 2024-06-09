@@ -15,3 +15,22 @@ export function isoDateWithoutTimeZone(date: Date | string | null): string {
     return ''
   }
 }
+
+export function lsSet (propName: string, content: any) {
+  if (typeof content !== 'string') {
+    content = JSON.stringify(content)
+  }
+  localStorage.setItem(propName, content)
+}
+
+export function lsGet (propName: string): any | null {
+  let localStorageItem = localStorage.getItem(propName)
+  if (localStorageItem) {
+    try {
+      localStorageItem = JSON.parse(localStorageItem)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  return localStorageItem
+}

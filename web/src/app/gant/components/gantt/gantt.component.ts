@@ -1,12 +1,12 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import Gantt, { EnrichedTask } from 'frappe-gantt-angular15';
 import { Observable, filter, map, of, tap } from 'rxjs';
 import { IGantEvent, StoreService } from '../../services/store.service';
 import { GantService } from '../../services/gant.service';
 import { eventToUpdate } from '@app/gant/services/api.service';
-import { isoDateWithoutTimeZone } from '@app/gant/services/helpers';
-
+import { isoDateWithoutTimeZone, lsGet, lsSet } from '@app/gant/services/helpers';
+import { DrawerService } from '../drawer/drawer.service';
 
 @Component({
 	selector: 'app-gantt',
@@ -17,8 +17,9 @@ import { isoDateWithoutTimeZone } from '@app/gant/services/helpers';
   ],
 
 })
-export class GanttComponent implements OnInit {
+export class GanttComponent implements OnInit, AfterViewInit {
 	@ViewChild('gantt') ganttElement!: ElementRef;
+
   public viewModes$: Observable<any> = of([
     { id: 'Day', name: 'Дни' },
     { id: 'Week', name: 'Недели' },
@@ -26,6 +27,7 @@ export class GanttComponent implements OnInit {
     { id: 'Year', name: 'Годы' },
   ])
   testVar = 'testCar'
+  selectedEvent: EnrichedTask | null = null
   public form: FormGroup;
   gantt!: Gantt
   tasks!: Gantt.Task[]
@@ -42,12 +44,14 @@ export class GanttComponent implements OnInit {
     view_mode: 'Year',
     date_format: 'YYYY-MM-DD',
     language: 'ru', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    custom_popup_html: function(task: Gantt.EnrichedTask) {
+    custom_popup_html: (task: Gantt.EnrichedTask) => {
       return `
         <div class="details-container">
-          <h5>${task.name}</h5>
-          <p>Task started on: ${isoDateWithoutTimeZone(task._start)}</p>
-          <p>Expected to finish by ${isoDateWithoutTimeZone(task._start)}</p>
+          <div class="topRow">
+            <h5>${task.name}</h5>
+          </div>
+          <p>${isoDateWithoutTimeZone(task._start)}</p>
+          <p>-> ${isoDateWithoutTimeZone(task._start)}</p>
           <p>${task.progress}% completed!</p>
         </div>
       `;
@@ -57,6 +61,103 @@ export class GanttComponent implements OnInit {
     },
     on_progress_change: (task: EnrichedTask, progress: number) => {
       this.updateEventProgress(task, progress)
+    },
+    on_click: (task: EnrichedTask) => {
+      this.handleEventClick(task)
+    },
+  }
+
+
+  constructor(
+    private fb: FormBuilder,
+    private gantService: GantService,
+    private storeService: StoreService,
+    private cdr: ChangeDetectorRef,
+  ) {
+    this.form = this.fb.group({
+      viewMode: ['Month'],
+    })
+    this.form.get('viewMode')?.valueChanges.subscribe((res => {
+      this.gantt.change_view_mode(res)
+      this.gantt.refresh(this.tasks)
+    }))
+    this.gantService.getEvents().subscribe((res: any) => {
+      this.form.patchValue({ viewMode: this.form.controls['viewMode'].value })
+    })
+   }
+
+  ngOnInit(): void {
+    this.storeService.listenGantEvent().pipe(
+      filter(array => array.length > 0),
+      map((res: any) => {
+        return res.map(this.gantService.convertEvent)
+      }),
+      tap((res: Gantt.Task[]) => {
+
+        this.tasks = JSON.parse(JSON.stringify(res)) as Gantt.Task[]
+
+        if (this.gantt) {
+          this.gantt.refresh(this.tasks)
+        } else {
+          this.gantt = new Gantt(this.ganttElement.nativeElement, this.tasks, this.options);
+        }
+
+        this.cdr.detectChanges()
+        console.log(this.gantt)
+        this.buildLeftPanel(this.gantt)
+        this.toggleLeftSideWidth()
+      })
+    ).subscribe()
+  }
+
+  ngAfterViewInit (): void {
+    console.log(this.gantt)
+  }
+  public gantTasks: any[] = []
+  public gridHeaderHeight: number = 0
+  public gridItemHeight: number = 0
+  private leftSideWidthInitial: number = 0
+  public leftSideWidth: number = this.leftSideWidthInitial
+  public isLeftSideExpanded: boolean = false
+
+
+  buildLeftPanel (gantt: any) {
+    this.gantTasks = gantt.tasks
+    this.calculateGridItemHeight()
+    this.calculateGridHeaderHeight()
+  }
+
+  toggleLeftSideWidth () {
+    if (this.leftSideWidth === this.leftSideWidthInitial) {
+      this.isLeftSideExpanded = !!lsGet('isLeftSideExpanded')
+    } else {
+      this.isLeftSideExpanded = !this.isLeftSideExpanded
+      lsSet('isLeftSideExpanded', this.isLeftSideExpanded)
+    }
+    this.leftSideWidth = this.isLeftSideExpanded ? 100 : 27
+    this.cdr.detectChanges()
+  }
+
+  setLeftSideWidth () {
+    // this.leftSideWidth
+  }
+
+  calculateGridItemHeight (): void {
+    this.gridItemHeight = (this.options.bar_height ?? 0) + (this.options.padding ?? 0)
+  }
+  calculateGridHeaderHeight (): void {
+    const svgElement = this.ganttElement?.nativeElement;
+    if (svgElement) {
+
+      const gridHeaderElements = svgElement.getElementsByClassName('grid-header');
+
+      if (gridHeaderElements.length > 0) {
+        const gridHeaderElement = gridHeaderElements[0]; // Assuming there's only one rect with class 'grid-header'
+        const gridHeaderHeight = gridHeaderElement.getAttribute('height');
+        this.gridHeaderHeight = gridHeaderHeight
+      } else {
+        console.log('Grid header rect not found');
+      }
     }
   }
 
@@ -80,45 +181,12 @@ export class GanttComponent implements OnInit {
     this.gantService.updateEvent(data).subscribe()
   }
 
-  constructor(
-    private fb: FormBuilder,
-    private gantService: GantService,
-    private storeService: StoreService,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.form = this.fb.group({
-      viewMode: ['Month'],
-    })
-    this.form.get('viewMode')?.valueChanges.subscribe((res => {
-      this.gantt.change_view_mode(res)
-      this.gantt.refresh(this.tasks)
-    }))
+  deleteEvent() {
+    // console.log(task)
+  }
 
-    this.gantService.getEvents().subscribe((res: any) => {
-      this.form.patchValue({ viewMode: this.form.controls['viewMode'].value })
-    })
-    // this.gantt.
-   }
-
-  ngOnInit(): void {
-    this.storeService.listenGantEvent().pipe(
-      filter(array => array.length > 0),
-      map((res: any) => {
-        return res.map(this.gantService.convertEvent)
-      }),
-      tap((res: Gantt.Task[]) => {
-
-        this.tasks = res as Gantt.Task[]
-
-        if (this.gantt) {
-          this.gantt.refresh(this.tasks)
-        } else {
-          this.gantt = new Gantt(this.ganttElement.nativeElement, this.tasks, this.options);
-        }
-
-        this.cdr.detectChanges()
-      })
-    ).subscribe()
-    // this.gantt.
+  handleEventClick(element?: EnrichedTask | any) {
+    this.selectedEvent = element
+    console.log(this.selectedEvent)
   }
 }

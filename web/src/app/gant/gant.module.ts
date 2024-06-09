@@ -48,7 +48,7 @@ export const remoteRoutes: Routes = [
         GantComponent,
         GanttComponent,
         DrawerComponent,
-        LoaderComponent
+        LoaderComponent,
     ],
     providers: [
         HttpClient,

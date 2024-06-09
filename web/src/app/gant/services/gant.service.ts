@@ -15,20 +15,12 @@ export class GantService {
     @Inject(DrawerService) private drawerService: DrawerService,
   ) { }
 
-  addGantEvent () {
-    // this.apiService.addEvent()
-    const event1 = this.apiService.getRandomEvent()
-    const event2 = this.apiService.getRandomEvent()
-
-    // this.storeService.setGantEvents([event1, event2])
-  }
 
   getEvents (): Observable<IGantEvent[]> {
     this.drawerService.showAfterInit('loader')
 
     return this.apiService.getEvents()
     .pipe(
-      delay(2000),
       tap((res: IGantEvent[]) => {
         this.storeService.setGantEvents(res)
       }),

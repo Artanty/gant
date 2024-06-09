@@ -20,4 +20,62 @@
   padding: 0px 8px;
 }
 
+.panelsContainer{
+  display: flex;
+  & .leftPanel{
+    background-color: #2f3767;
+    transition: min-width 0.5s;
+    &__header{
+      background-color: #993c3c;
+      border: 1px solid #000;
+      box-sizing: border-box;
+    }
+    &__list{
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      margin-top: -1px;
+
+      &__item{
+        color: #aaa;
+        height: 38.1px;
+        border: 0.6px solid #000;
+        box-sizing: border-box;
+        overflow: hidden;
+        display: block;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 2.9;
+        padding-left: 4px;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.deleteBtn {
+  background: #993c3c;
+  border: none;
+  border-radius: 25px;
+  color: #e4e4e4;
+  line-height: 1.2;
+  min-width: 16px;
+  height: 16px;
+  cursor: pointer;
+  font-size: 9px;
+  margin-right: 4px;
+}
+.toggleBtn{
+  background: #271191;
+  border: none;
+  border-radius: 5px;
+  color: #e4e4e4;
+  line-height: 1.2;
+  min-width: 18px;
+  height: 18px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  margin: 3px;
+}
 
