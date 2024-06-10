@@ -50,18 +50,9 @@
               [placeholder]="readonly ? 'Нет описания' : 'Введите описание...'"
               [readonly]="readonly"
     ></textarea>
-
-    <app-date-picker
-      [date]="start"
-      [reset]="resetDatePicker"
-      (selectedDate)="onSelectDateStart($event)"
-    ></app-date-picker>
-
-    <app-date-picker
-      [date]="end"
-      [reset]="resetDatePicker"
-      (selectedDate)="onSelectDateEnd($event)"
-    ></app-date-picker>
+<!-- DATES -->
+    <app-date-picker formControlName="start"></app-date-picker>
+    <app-date-picker formControlName="end"></app-date-picker>
   </div>
 
   <input type="hidden" formControlName="externalServiceId">

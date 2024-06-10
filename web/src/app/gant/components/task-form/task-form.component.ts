@@ -9,6 +9,8 @@ import { greaterThanZeroValidator } from '@app/app.config';
 import { DrawerService } from '../drawer/drawer.service';
 import { ApiService } from '@app/gant/services/api.service';
 import { GantService } from '@app/gant/services/gant.service';
+import { dateRangeValidator } from '@app/gant/services/validators';
+
 
 export interface ITaskFormValue {
   name: string
@@ -49,39 +51,34 @@ export class TaskFormComponent {
   @Input() set fg (data: any) {
     this.form = data
   }
-  due_date: string = ''
+  due_date: string = '' // todo delete?
   @Input() set date (val: any) {
     this.due_date = val
   }
   public form: FormGroup;
   public resetDatePicker: boolean = false
 
-  start: string = new Date().toISOString().split('T')[0]
-  end: string = new Date().toISOString().split('T')[0]
-  date_end_result: string = ''
-  date_start_result: string = ''
-
   constructor(
     private fb: FormBuilder,
     private drawerService: DrawerService,
     private gantService: GantService
   ) {
-    console.log('readonly: ' + this.readonly)
+    // console.log('readonly: ' + this.readonly)
     this.resetDatePicker = true // do not remove
     this.form = this.fb.group({
       name: ['', Validators.required],
       eventTypeId: ['', [Validators.required, greaterThanZeroValidator()]],
-      start: [''],
-      end: [''],
+      start: [new Date().toISOString()],
+      end: [new Date().toISOString()],
       progress: ['', [Validators.required]],
       dependencies: [''],
       textId: ['', [Validators.required]],
       id: [''],
       externalServiceId: [''],
       description:  [''],
-    });
+    }, { validators: dateRangeValidator('start', 'end') });
     this.form.patchValue(this.getDefaultFormData())
-
+    this.form.valueChanges.subscribe(console.log)
   }
 
   private getDefaultFormData(): ITaskFormValue {
@@ -102,27 +99,29 @@ export class TaskFormComponent {
   }
 
 
-  public onSelectDateStart (data: string) {
-    this.date_start_result = data
-  }
+  // public onSelectDateStart (data: any | string) {
+  //   console.log(data)
+  //   this.date_start_result = data
+  // }
 
-  public onSelectDateEnd (data: any | string) {
-    this.date_end_result = data
-  }
+  // public onSelectDateEnd (data: any | string) {
+  //   console.log(data)
+  //   this.date_end_result = data
+  // }
 
 
   onSubmit() {
-    // console.log(this.form.valid)
-    // console.log(this.form.value)
-    if (this.form.valid) {
-      if (this.form.value.id) {
-        this.prepareAndEditTask()
-      } else {
-        this.prepareAndCreateTask()
-      }
-    } else {
-      this.form.markAllAsTouched()
-    }
+    console.log(this.form.valid)
+    console.log(this.form.value)
+    // if (this.form.valid) {
+    //   if (this.form.value.id) {
+    //     this.prepareAndEditTask()
+    //   } else {
+    //     this.prepareAndCreateTask()
+    //   }
+    // } else {
+    //   this.form.markAllAsTouched()
+    // }
   }
 
   onCancel() {
@@ -155,8 +154,8 @@ export class TaskFormComponent {
     const eventData: ITaskFormValue = {
       name: this.form.value.name,
       eventTypeId: this.form.value.eventTypeId,
-      start: this.date_start_result,
-      end: this.date_end_result,
+      start: this.form.value.start,
+      end: this.form.value.end,
       progress: this.form.value.progress,
       dependencies: this.form.value.dependencies,
       textId: this.form.value. textId,

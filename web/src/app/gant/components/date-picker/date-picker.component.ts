@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Output, EventEmitter, Input, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef, Inject } from '@angular/core';
-import { FormGroup, FormControl, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Component, Output, EventEmitter, Input, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef, Inject, forwardRef } from '@angular/core';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule, FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { isSame, isoDateWithoutTimeZone } from '@app/gant/services/helpers';
+
+export interface IDateObj {
+  day: number | string
+  month: number | string
+  year: number | string
+}
 
 @Component({
   selector: 'app-date-picker',
@@ -8,45 +15,31 @@ import { FormGroup, FormControl, Validators, ReactiveFormsModule, FormsModule } 
   standalone: true,
   providers: [
     CommonModule,
-    ReactiveFormsModule
+    FormsModule,
+    ReactiveFormsModule,
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => DatePickerComponent),
+      multi: true
+    }
   ],
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   styleUrls: [
     './date-picker.component.scss',
     './../select/select.component.scss'
-  ]
+  ],
+
 })
-export class DatePickerComponent {
-  @Output() selectedDate = new EventEmitter<string>();
-  @Input() set reset(value: boolean) {
-    if (value) {
-      this.resetDate();
-    }
-  }
-
-  // New input setter to set the date from a string in 'YYYY-MM-DD' format
-  @Input() set date(dateString: string) {
-    if (dateString) {
-      const parts = dateString.split('T')[0]?.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10);
-        const day = parseInt(parts[2], 10);
-        this.dateForm.get('year')?.setValue(year);
-        this.dateForm.get('month')?.setValue(month);
-        this.updateDaysInMonth(month, year);
-        this.dateForm.get('day')?.setValue(day);
-      }
-    }
-  }
-
+export class DatePickerComponent implements ControlValueAccessor{
   dateForm: FormGroup;
   days: number[] = [];
   months = Array.from({ length: 12 }, (_, i) => i + 1);
   years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
 
-  constructor() {
+  constructor(
+    private cdr: ChangeDetectorRef,
+  ) {
     const today = new Date();
     this.dateForm = new FormGroup({
       day: new FormControl(today.getDate(), Validators.required),
@@ -54,33 +47,33 @@ export class DatePickerComponent {
       year: new FormControl(today.getFullYear(), Validators.required)
     });
 
-    this.updateDaysInMonth(today.getMonth() + 1, today.getFullYear());
-    this.emitSelectedDate();
+    // this.updateDaysInMonth(today.getMonth() + 1, today.getFullYear());
+    // this.emitSelectedDate();
 
     this.dateForm.get('day')?.valueChanges.subscribe((day) => {
-      this.emitSelectedDate();
+      this.emitSelectedDate({ day: +day });
     });
 
     this.dateForm.get('month')?.valueChanges.subscribe((month) => {
       const year = this.dateForm.get('year')?.value;
       this.updateDaysInMonth(month, year);
-      this.emitSelectedDate();
+      this.emitSelectedDate({ month: +month });
     });
 
     this.dateForm.get('year')?.valueChanges.subscribe((year) => {
       const month = this.dateForm.get('month')?.value;
       this.updateDaysInMonth(month, year);
-      this.emitSelectedDate();
+      this.emitSelectedDate({ year: +year });
     });
   }
 
   resetDate(): void {
-    const today = new Date();
-    this.dateForm.get('day')?.setValue(today.getDate());
-    this.dateForm.get('month')?.setValue(today.getMonth() + 1);
-    this.dateForm.get('year')?.setValue(today.getFullYear());
-    this.updateDaysInMonth(today.getMonth() + 1, today.getFullYear());
-    this.emitSelectedDate();
+    // const today = new Date();
+    // this.dateForm.get('day')?.setValue(today.getDate());
+    // this.dateForm.get('month')?.setValue(today.getMonth() + 1);
+    // this.dateForm.get('year')?.setValue(today.getFullYear());
+    // this.updateDaysInMonth(today.getMonth() + 1, today.getFullYear());
+    // this.emitSelectedDate();
   }
 
   updateDaysInMonth(month: number, year: number): void {
@@ -93,17 +86,69 @@ export class DatePickerComponent {
     }
   }
 
-  emitSelectedDate(): void {
-    if (this.dateForm.valid) {
-      const selectedDate = new Date(this.dateForm.value.year, this.dateForm.value.month - 1, this.dateForm.value.day);
-      this.selectedDate.emit(this.formatDate(selectedDate));
+  private isSameAsValue(updatedDate: IDateObj) {
+    return isSame(this.parseDateStr2Obj(this.value), updatedDate)
+  }
+
+  emitSelectedDate(data?: Partial<IDateObj>): void {
+    if (this.dateForm.valid && this.dateForm.dirty) {
+      const updatedDate = {...this.dateForm.value, ...data}
+      if (!this.isSameAsValue(updatedDate)) {
+        const selectedDate = new Date(
+          updatedDate.year,
+          updatedDate.month - 1,
+          updatedDate.day
+        )
+        this.onChange(isoDateWithoutTimeZone(selectedDate))
+      }
     }
   }
 
-  formatDate(date: Date): string {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${year}-${month}-${day}`;
+  private parseDateStr2Obj (dateString: string): IDateObj {
+    const parts = dateString.split('T')[0]?.split('-');
+    if (parts.length !== 3) throw new Error(`Wrong format of dateString`)
+
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+
+    return { day, month, year }
+  }
+
+  private setDate(dateString: string) {
+    if (dateString) {
+      const { day, month, year }: IDateObj = this.parseDateStr2Obj(dateString)
+
+      this.dateForm.get('year')?.setValue(year);
+      this.dateForm.get('month')?.setValue(month);
+      this.updateDaysInMonth(+month, +year);
+      this.dateForm.get('day')?.setValue(day);
+      this.cdr.detectChanges()
+    }
+  }
+
+  /**
+   * CUSTOM CONTROL IMPLEMENTATION
+   */
+  value!: string;
+  disabled = false;
+  onChange: any = () => {};
+  onTouch: any = () => {};
+
+  writeValue(obj: any): void {
+    this.value = obj;
+    this.setDate(obj)
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouch = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
   }
 }
