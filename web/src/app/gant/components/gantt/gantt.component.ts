@@ -5,7 +5,7 @@ import { EMPTY, Observable, catchError, filter, map, of, pipe, tap } from 'rxjs'
 import { IGantEvent, StoreService } from '../../services/store.service';
 import { GantService } from '../../services/gant.service';
 import { eventToUpdate, ApiService } from '@app/gant/services/api.service';
-import { isoDateWithoutTimeZone, lsGet, lsSet } from '@app/gant/services/helpers';
+import { noTimeZone, lsGet, lsSet } from '@app/gant/services/helpers';
 import { DrawerService } from '../drawer/drawer.service';
 
 @Component({
@@ -50,8 +50,8 @@ export class GanttComponent implements OnInit, AfterViewInit {
           <div class="topRow">
             <h5>${task.name}</h5>
           </div>
-          <p>${isoDateWithoutTimeZone(task._start)}</p>
-          <p>-> ${isoDateWithoutTimeZone(task._end)}</p>
+          <p>${noTimeZone(task._start)}</p>
+          <p>-> ${noTimeZone(task._end)}</p>
           <p>${task.progress}% completed!</p>
         </div>
       `;
@@ -162,8 +162,8 @@ export class GanttComponent implements OnInit, AfterViewInit {
   updateEventDate (task: Gantt.EnrichedTask, start: Date, end: Date) {
     const data: eventToUpdate = {
       textId: task.id,
-      start: isoDateWithoutTimeZone(start),
-      end: isoDateWithoutTimeZone(end),
+      start: noTimeZone<string>(start),
+      end: noTimeZone<string>(end),
       progress: task.progress
     }
     this.gantService.updateEvent(data).subscribe()

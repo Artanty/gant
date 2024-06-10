@@ -10,6 +10,7 @@ import { DrawerService } from '../drawer/drawer.service';
 import { ApiService } from '@app/gant/services/api.service';
 import { GantService } from '@app/gant/services/gant.service';
 import { dateRangeValidator } from '@app/gant/services/validators';
+import { noTimeZone } from '@app/gant/services/helpers';
 
 
 export interface ITaskFormValue {
@@ -59,8 +60,8 @@ export class TaskFormComponent {
     this.form = this.fb.group({
       name: ['', Validators.required],
       eventTypeId: ['', [Validators.required, greaterThanZeroValidator()]],
-      start: [new Date().toISOString()],
-      end: [new Date().toISOString()],
+      start: [noTimeZone<string>(new Date(), { resetTime: true })],
+      end: [noTimeZone<string>(new Date(), { resetTime: true })],
       progress: ['', [Validators.required]],
       dependencies: [''],
       textId: ['', [Validators.required]],
@@ -76,11 +77,11 @@ export class TaskFormComponent {
     const initialData: ITaskFormValue = {
       name: 'Событие 1',
       eventTypeId: 1,
-      start: new Date().toISOString(),
-      end: new Date().toISOString(),
+      start: noTimeZone<string>(new Date(), { resetTime: true }),
+      end: noTimeZone<string>(new Date(), { resetTime: true }),
       progress: '1',
       dependencies: '',
-      textId: 'event_' + new Date().toISOString(),
+      textId: 'event_' + noTimeZone<string>(new Date(), { resetTime: true }),
       externalServiceId: '',
       description: 'Описание события',
       id: null

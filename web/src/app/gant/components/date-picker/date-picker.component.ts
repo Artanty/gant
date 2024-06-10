@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Output, EventEmitter, Input, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef, Inject, forwardRef } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule, FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor, NG_VALIDATORS, AbstractControl, ValidationErrors, Validator } from '@angular/forms';
-import { isSame, isoDateWithoutTimeZone } from '@app/gant/services/helpers';
+import { isSame, noTimeZone } from '@app/gant/services/helpers';
 import { Observable, delay, startWith } from 'rxjs';
 
 export interface IDateObj {
@@ -45,13 +45,12 @@ export class DatePickerComponent implements ControlValueAccessor, Validator{
   isDateRangeInvalid: boolean = false
 
   constructor() {
-    const today = new Date();
+    const today = noTimeZone<Date>(new Date(), { returnDateObj: true, resetTime: true });
     this.dateForm = new FormGroup({
       day: new FormControl(today.getDate(), Validators.required),
       month: new FormControl(today.getMonth() + 1, Validators.required),
       year: new FormControl(today.getFullYear(), Validators.required)
-    });
-
+    })
 
     this.dateForm.get('day')?.valueChanges.subscribe((day) => {
       this.emitSelectedDate({ day: +day });
@@ -102,7 +101,7 @@ export class DatePickerComponent implements ControlValueAccessor, Validator{
           updatedDate.month - 1,
           updatedDate.day
         )
-        this.onChange(isoDateWithoutTimeZone(selectedDate))
+        this.onChange(noTimeZone<string>(selectedDate))
       }
     }
   }

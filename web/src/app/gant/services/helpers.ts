@@ -1,24 +1,50 @@
-export function isoDateWithoutTimeZone(date: Date | string | null, resetTime = false, sliceTime = false): string {
+export interface IDateWithoutTimeZoneOptions {
+  resetTime: boolean,
+  sliceTime: boolean,
+  returnDateObj: boolean
+}
+
+const defaultOptions: IDateWithoutTimeZoneOptions = {
+  resetTime: false,
+  sliceTime: false,
+  returnDateObj: false
+}
+
+export type TDateOrString<T> = T extends Date ? Date : string
+
+export function noTimeZone<T extends Date | string>(
+  date: Date | string | null,
+  options: Partial<IDateWithoutTimeZoneOptions> = defaultOptions
+): TDateOrString<T> {
+  const { resetTime, sliceTime, returnDateObj } = options
+  if (returnDateObj && sliceTime) {
+    throw new Error('Can\'t slice time while returning Date object')
+  }
   try {
-    if (!date) return ''
+    if (!date) return '' as TDateOrString<T>;
     if (!(date instanceof Date)){
       date = new Date(date)
     }
+
     var timestamp = date.getTime() - date.getTimezoneOffset() * 60000;
     var correctDate = new Date(timestamp);
+
     if (resetTime) {
       correctDate.setUTCHours(0, 0, 0, 0);
     }
 
-    if (sliceTime) {
-      return correctDate.toISOString().substring(0, 10)
+    if (returnDateObj) {
+      return correctDate as TDateOrString<T>
+    } else {
+      if (sliceTime) {
+        return correctDate.toISOString().substring(0, 10) as TDateOrString<T>
+      }
+      return correctDate.toISOString() as TDateOrString<T>
     }
-    return correctDate.toISOString()
   } catch (e) {
-    // this.showSnackbarMessage('error', 'Не удалось преобразовать дату')
     console.log('Не удалось преобразовать дату, ERROR: ')
     console.log(e)
-    return ''
+    return '' as TDateOrString<T>
   }
 }
 
