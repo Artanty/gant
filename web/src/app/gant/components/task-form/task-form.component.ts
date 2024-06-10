@@ -45,16 +45,8 @@ export class TaskFormComponent {
   @Input() public readonly = false
   @Input() public externals$?: Observable<any>
   @Input() public taskStatusOptions: any[] = []
-  @Input() set doResetDatePicker (data: any) {
-    this.resetDatePicker = data
-  }
-  @Input() set fg (data: any) {
-    this.form = data
-  }
-  due_date: string = '' // todo delete?
-  @Input() set date (val: any) {
-    this.due_date = val
-  }
+
+
   public form: FormGroup;
   public resetDatePicker: boolean = false
 
@@ -63,7 +55,6 @@ export class TaskFormComponent {
     private drawerService: DrawerService,
     private gantService: GantService
   ) {
-    // console.log('readonly: ' + this.readonly)
     this.resetDatePicker = true // do not remove
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -78,7 +69,6 @@ export class TaskFormComponent {
       description:  [''],
     }, { validators: dateRangeValidator('start', 'end') });
     this.form.patchValue(this.getDefaultFormData())
-    this.form.valueChanges.subscribe(console.log)
   }
 
   private getDefaultFormData(): ITaskFormValue {
@@ -99,29 +89,18 @@ export class TaskFormComponent {
   }
 
 
-  // public onSelectDateStart (data: any | string) {
-  //   console.log(data)
-  //   this.date_start_result = data
-  // }
-
-  // public onSelectDateEnd (data: any | string) {
-  //   console.log(data)
-  //   this.date_end_result = data
-  // }
-
-
   onSubmit() {
-    console.log(this.form.valid)
-    console.log(this.form.value)
-    // if (this.form.valid) {
-    //   if (this.form.value.id) {
-    //     this.prepareAndEditTask()
-    //   } else {
-    //     this.prepareAndCreateTask()
-    //   }
-    // } else {
-    //   this.form.markAllAsTouched()
-    // }
+    // console.log(this.form.valid)
+    // console.log(this.form.value)
+    if (this.form.valid) {
+      if (this.form.value.id) {
+        this.prepareAndEditTask()
+      } else {
+        this.prepareAndCreateTask()
+      }
+    } else {
+      this.form.markAllAsTouched()
+    }
   }
 
   onCancel() {
@@ -146,11 +125,9 @@ export class TaskFormComponent {
       progress: initialProgress
     });
     this.resetDatePicker = true
-    console.log(this.form.value)
   }
 
   prepareAndCreateTask () {
-    this.drawerService.show('loader')
     const eventData: ITaskFormValue = {
       name: this.form.value.name,
       eventTypeId: this.form.value.eventTypeId,

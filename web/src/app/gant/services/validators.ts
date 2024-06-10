@@ -10,12 +10,10 @@ export function dateRangeValidator(dateFromControlName: string, dateToControlNam
       const dateTo = new Date(dateToControl.value);
 
       if (dateFrom > dateTo) {
-        // Return an error object if dateFrom is later than dateTo
         return { dateRange: true };
       }
     }
 
-    // If the validation passes, return null
     return null;
   };
 }

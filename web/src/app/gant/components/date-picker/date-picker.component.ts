@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Output, EventEmitter, Input, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef, Inject, forwardRef } from '@angular/core';
-import { FormGroup, FormControl, Validators, ReactiveFormsModule, FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule, FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor, NG_VALIDATORS, AbstractControl, ValidationErrors, Validator } from '@angular/forms';
 import { isSame, isoDateWithoutTimeZone } from '@app/gant/services/helpers';
+import { Observable, delay, startWith } from 'rxjs';
 
 export interface IDateObj {
   day: number | string
@@ -21,6 +22,11 @@ export interface IDateObj {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => DatePickerComponent),
       multi: true
+    },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => DatePickerComponent),
+      multi: true
     }
   ],
   imports: [ReactiveFormsModule, FormsModule, CommonModule],
@@ -31,15 +37,14 @@ export interface IDateObj {
   ],
 
 })
-export class DatePickerComponent implements ControlValueAccessor{
+export class DatePickerComponent implements ControlValueAccessor, Validator{
   dateForm: FormGroup;
   days: number[] = [];
   months = Array.from({ length: 12 }, (_, i) => i + 1);
   years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
+  isDateRangeInvalid: boolean = false
 
-  constructor(
-    private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
     const today = new Date();
     this.dateForm = new FormGroup({
       day: new FormControl(today.getDate(), Validators.required),
@@ -47,8 +52,6 @@ export class DatePickerComponent implements ControlValueAccessor{
       year: new FormControl(today.getFullYear(), Validators.required)
     });
 
-    // this.updateDaysInMonth(today.getMonth() + 1, today.getFullYear());
-    // this.emitSelectedDate();
 
     this.dateForm.get('day')?.valueChanges.subscribe((day) => {
       this.emitSelectedDate({ day: +day });
@@ -123,7 +126,6 @@ export class DatePickerComponent implements ControlValueAccessor{
       this.dateForm.get('month')?.setValue(month);
       this.updateDaysInMonth(+month, +year);
       this.dateForm.get('day')?.setValue(day);
-      this.cdr.detectChanges()
     }
   }
 
@@ -150,5 +152,18 @@ export class DatePickerComponent implements ControlValueAccessor{
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+  }
+
+  /**
+   * listen parent from group validation
+   */
+  validate(control: AbstractControl): ValidationErrors | null {
+    setTimeout(() => {
+      this.isDateRangeInvalid = (control?.parent?.status === 'INVALID') && control?.parent?.errors?.['dateRange']
+        ? true
+        : false
+    }, 0)
+
+    return null;
   }
 }

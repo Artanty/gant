@@ -1,4 +1,4 @@
-<form [formGroup]="dateForm">
+<form [formGroup]="dateForm" [class.invalid]="isDateRangeInvalid">
   <div class="row">
     <div class="col custom-select">
       <label for="day">День:</label>

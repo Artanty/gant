@@ -1,3 +1,11 @@
+form{
+  &.invalid .col{
+    & select, & label {
+      color: #ef2727;
+    }
+  }
+}
+
 .row {
   display: flex;
   gap: 10px;
